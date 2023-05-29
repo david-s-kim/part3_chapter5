@@ -6,10 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.part3_chapter5.databinding.FragmentSearchBinding
+import com.example.part3_chapter5.list.ListAdapter
 
 class SearchFragment : Fragment() {
 
-    private var binding : FragmentSearchBinding? = null
+    private var binding: FragmentSearchBinding? = null
+
+    private val adapter by lazy { ListAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -17,12 +20,23 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return FragmentSearchBinding.inflate(inflater, container, false).apply {
-           binding = this
+            binding = this
         }.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding?.apply {
+            recyclerView.adapter = adapter
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         binding = null
+    }
+
+    fun searchKeyword(text: String) {
+
     }
 }

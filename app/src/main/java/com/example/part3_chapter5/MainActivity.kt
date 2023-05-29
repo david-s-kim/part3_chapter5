@@ -1,11 +1,18 @@
 package com.example.part3_chapter5
 
+import android.database.Observable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.widget.SearchView
+import coil.request.Disposable
 import com.example.part3_chapter5.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.schedulers.Schedulers
+import retrofit2.converter.gson.GsonConverterFactory.create
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     private val searchFragment = SearchFragment()
     private val fragmentList = listOf(searchFragment, FavoritesFragment())
     private val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle, fragmentList)
+
+    private var observableTextQuery: Disposable? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             viewPager.adapter = adapter
 
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                tab.text = if(fragmentList[position] is SearchFragment) {
+                tab.text = if (fragmentList[position] is SearchFragment) {
                     "검색 결과"
                 } else {
                     "즐겨 찾기"
@@ -37,21 +46,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        observableTextQuery?.dispose()
+        observableTextQuery = null
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.options_menu, menu)
 
-        (menu?.findItem(R.id.search)?.actionView as SearchView).apply {
-            setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-                override fun onQueryTextSubmit(query: String): Boolean {
+        observableTextQuery = Observable.create { emitter: ObservableEmitter<String>? ->
+            (menu?.findItem(R.id.search)?.actionView as SearchView).apply {
+                setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String): Boolean {
+                        emitter?.onNext(query)
+                        return false
+                    }
 
-                    return false
-                }
-
-                override fun onQueryTextChange(newText: String): Boolean {
-                    return false
-                }
-            })
+                    override fun onQueryTextChange(newText: String): Boolean {
+                        binding.viewPager.setCurrentItem(0, true)
+                        emitter?.onNext(newText)
+                        return false
+                    }
+                })
+            }
         }
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                searchFragment.searchKeyword(it)
+            }
+
         return true
     }
 }
