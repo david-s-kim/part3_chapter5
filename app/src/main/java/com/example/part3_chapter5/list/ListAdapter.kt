@@ -1,18 +1,20 @@
 package com.example.part3_chapter5.list
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
-import com.example.part3_chapter5.model.ListItem
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.example.part3_chapter5.databinding.ItemImageBinding
 import com.example.part3_chapter5.databinding.ItemVideoBinding
-import com.example.part3_chapter5.list.viewholder.ImageViewHolder
-import com.example.part3_chapter5.list.viewholder.VideoViewHolder
+import com.example.part3_chapter5.list.viewholder.ImageItemViewHolder
+import com.example.part3_chapter5.list.viewholder.VideoItemViewHolder
 import com.example.part3_chapter5.model.ImageItem
+import com.example.part3_chapter5.model.ListItem
 
-class ListAdapter: ListAdapter<ListItem, RecyclerView.ViewHolder>(diffUtil) {
+class ListAdapter(private val itemHandler: ItemHandler? = null) :
+    ListAdapter<ListItem, RecyclerView.ViewHolder>(diffUtil) {
 
     override fun getItemViewType(position: Int): Int {
         return if (getItem(position) is ImageItem) {
@@ -25,18 +27,18 @@ class ListAdapter: ListAdapter<ListItem, RecyclerView.ViewHolder>(diffUtil) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (viewType == IMAGE) {
-            ImageViewHolder(ItemImageBinding.inflate(inflater, parent, false))
+            ImageItemViewHolder(ItemImageBinding.inflate(inflater, parent, false), itemHandler)
         } else {
-            VideoViewHolder(ItemVideoBinding.inflate(inflater, parent, false))
+            VideoItemViewHolder(ItemVideoBinding.inflate(inflater, parent, false), itemHandler)
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position)
         if (getItemViewType(position) == IMAGE) {
-            (holder as ImageViewHolder).bind(item)
+            (holder as ImageItemViewHolder).bind(item)
         } else {
-            (holder as VideoViewHolder).bind(item)
+            (holder as VideoItemViewHolder).bind(item)
         }
     }
 
@@ -45,15 +47,12 @@ class ListAdapter: ListAdapter<ListItem, RecyclerView.ViewHolder>(diffUtil) {
         private const val VIDEO = 1
 
         private val diffUtil = object : DiffUtil.ItemCallback<ListItem>() {
-            override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem) = oldItem.thumbnailUrl == newItem.thumbnailUrl
+            override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem) =
+                oldItem.thumbnailUrl == newItem.thumbnailUrl
 
-
-            override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem) = oldItem == newItem
-
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem) =
+                oldItem == newItem
         }
     }
-
-
-
-
 }

@@ -7,6 +7,10 @@
         <variable
             name="item"
             type="com.example.part3_chapter5.model.VideoItem" />
+        
+        <variable
+            name="handler"
+            type="com.example.part3_chapter5.list.ItemHandler" />
 
     </data>
 
@@ -79,6 +83,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/favoriteImageView"
             favorite="@{item.favorite}"
+            android:onClick="@{() -> handler.onClickFavorite(item)"
             app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 

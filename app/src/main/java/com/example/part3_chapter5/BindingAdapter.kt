@@ -16,7 +16,7 @@ fun View.setVisible(isShow: Boolean) {
 }
 
 @BindingAdapter("image")
-fun ImageView.setImage(imageUrl : String?) {
+fun ImageView.setImage(imageUrl: String?) {
     load(imageUrl) {
         crossfade(300)
     }
@@ -31,7 +31,8 @@ fun TextView.setDateText(date: Date?) {
     text = SimpleDateFormat("YYYY.MM.DD HH:mm:ss").format(date)
 
 }
+
 @BindingAdapter("favorite")
-fun ImageView.setFavorite(isFavorite : Boolean) {
+fun ImageView.setFavorite(isFavorite: Boolean) {
     setImageResource(if (isFavorite) R.drawable.ic_baseline_favorite_24 else R.drawable.ic_baseline_favorite_border_24)
 }
